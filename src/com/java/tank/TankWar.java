@@ -40,13 +40,14 @@ class MyPanel extends JPanel implements Runnable{
 	
 	Hero hero = null;
 	Vector<EmentTank> ement = new Vector<EmentTank>();
+	Vector<Blod> blod = new Vector<Blod>();
 	
 	public MyPanel(){
 		hero = new Hero(10, 10, Direction.up);
 		Thread t = new Thread(hero);
 		t.start();
 		for(int i = 0; i < 3; i++){
-			EmentTank t1 = new EmentTank(100*i, 200*i, Direction.down);
+			EmentTank t1 = new EmentTank(50*i+100, 50*i+100, Direction.down);
 			ement.add(t1);
 			new Thread(t1).start();
 		}
@@ -61,9 +62,33 @@ class MyPanel extends JPanel implements Runnable{
 		drawTank(hero.getX(), hero.getY(), g, hero.getDir(), 0);
 		for(int i = 0; i < ement.size(); i++){
 			EmentTank e = ement.get(i);
-			drawTank(e.getX(), e.getY(), g, e.getDir(), 1);
+			if(!e.isLife()){
+				ement.remove(e);
+			}
+			else{
+			   drawTank(e.getX(), e.getY(), g, e.getDir(), 1);
+			}
+		}
+		for(int i = 0; i < blod.size(); i++){
+			g.setColor(Color.WHITE);
+			g.drawString("»¹Ê£"+blod.size(), 50, 50);
+			Blod b = blod.get(i);
+			if(b.isUse()){
+				this.drawBlod(b.getX(), b.getY(), g, b.R);
+				b.move();
+				for(int j = 0; j < ement.size(); j++)
+				     b.hitTank(ement.get(j));
+			}
+			else{
+				blod.remove(b);
+			}
 		}
 		g.setColor(c);
+	}
+	
+	public void drawBlod(int x, int y, Graphics g,int r){
+		g.setColor(Color.RED);
+		g.fillOval(x, y, r, r);
 	}
 	
 	public void drawTank(int x, int y, Graphics g, Direction dir, int type){
@@ -108,19 +133,47 @@ class MyPanel extends JPanel implements Runnable{
 			break;
 			default:
 				break;
-				
 		}
 	}
 	
 	class MyKey extends KeyAdapter{
 		@Override
 		public void keyPressed(KeyEvent e) {
-			hero.keyPressed(e);
+			//hero.keyPressed(e);
+			int code = e.getKeyCode();
+			Direction dir = hero.getDir();
+			if(code == KeyEvent.VK_UP){
+				dir = Direction.up;
+			}
+			else if(code == KeyEvent.VK_RIGHT){
+				dir = Direction.right;
+			}
+			else if(code == KeyEvent.VK_DOWN){
+				dir = Direction.down;
+			}
+			else if(code == KeyEvent.VK_LEFT){
+				dir = Direction.left;
+			}
+			else if(code == KeyEvent.VK_B){
+				if(blod.size() < 5){
+					Blod b = new Blod(hero.getX(), hero.getY(), hero.getDir());
+					if(hero.getDir() == Direction.up || hero.getDir() == Direction.down)
+						 b = new Blod(hero.getX() + 10, hero.getY(), hero.getDir());
+					else{
+						b = new Blod(hero.getX(), hero.getY() + 10, hero.getDir());
+					}
+					blod.add(b);
+				}
+				
+			}
+			hero.setDir(dir);
+			hero.move();
 		}
 		@Override
 		public void keyReleased(KeyEvent e) {
 			hero.keyReleased(e);
 		}
+		
 	}
 
 	@Override
@@ -129,7 +182,6 @@ class MyPanel extends JPanel implements Runnable{
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			repaint();

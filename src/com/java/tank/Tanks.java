@@ -1,5 +1,6 @@
 package com.java.tank;
 
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 class Tank{
@@ -11,6 +12,8 @@ class Tank{
 	private Direction dir ;
 	
 	private int speed = 3;
+	
+	private boolean life = true;
 	
 	public Tank(int x, int y){
 		this.x = x;
@@ -53,6 +56,14 @@ class Tank{
 		this.speed = speed;
 	}
 	
+	public boolean isLife() {
+		return life;
+	}
+
+	public void setLife(boolean life) {
+		this.life = life;
+	}
+
 	public void move(){
 		x1 = x;
 		y1 = y;
@@ -85,6 +96,10 @@ class Tank{
 			y = y1;
 		}
 	}
+	
+	public Rectangle getRectangle(){
+		return new Rectangle(x, y, 30, 30);
+	}
 }
 
 class Hero extends Tank implements Runnable{
@@ -94,26 +109,13 @@ class Hero extends Tank implements Runnable{
 	}
 
 	public void keyPressed(KeyEvent e) {
-		int code = e.getKeyCode();
-		Direction dir = this.getDir();
-		if(code == KeyEvent.VK_UP){
-			dir = Direction.up;
-		}
-		else if(code == KeyEvent.VK_RIGHT){
-			dir = Direction.right;
-		}
-		else if(code == KeyEvent.VK_DOWN){
-			dir = Direction.down;
-		}
-		else if(code == KeyEvent.VK_LEFT){
-			dir = Direction.left;
-		}
-		setDir(dir);
-		if(code==KeyEvent.VK_UP||code==KeyEvent.VK_RIGHT||code==KeyEvent.VK_DOWN||code==KeyEvent.VK_LEFT){
-		move();
-		}
+		
 	}
 
+	public Blod getBlod(){
+		return new Blod(this.getX()+10, this.getY(), this.getDir());
+	}
+	
 	@Override
 	public void run() {
 		while(true){
